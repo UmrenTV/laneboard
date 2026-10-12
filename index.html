@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Laneboard</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" data-icon="logo"></span>
+      <h1>Laneboard</h1>
+    </div>
+    <div class="filter" role="search">
+      <span class="filter-icon" data-icon="search"></span>
+      <label for="filter" class="sr-only">Filter cards by title or notes</label>
+      <input id="filter" type="search" placeholder="Filter cards…" autocomplete="off" spellcheck="false">
+      <span id="match-count" class="match-count" aria-live="polite"></span>
+      <button id="filter-clear" class="icon-btn small" type="button" aria-label="Clear filter" title="Clear filter" hidden><span data-icon="close"></span></button>
+    </div>
+    <div class="actions">
+      <button id="export-btn" class="icon-btn" type="button" aria-label="Export board as JSON" title="Export board as JSON"><span data-icon="download"></span></button>
+      <button id="import-btn" class="icon-btn" type="button" aria-label="Import board from JSON" title="Import board from JSON"><span data-icon="upload"></span></button>
+      <input id="import-file" type="file" accept="application/json,.json" aria-label="Choose a Laneboard JSON file" hidden>
+      <button id="theme-btn" class="icon-btn" type="button" aria-label="Toggle dark mode"></button>
+    </div>
+  </header>
+
+  <div id="tabs" class="tabs" role="tablist" aria-label="Columns"></div>
+  <main id="board" class="board" aria-label="Board"></main>
+
+  <div id="move-menu" class="menu" role="menu" hidden></div>
+
+  <dialog id="editor" class="editor" aria-labelledby="editor-heading">
+    <form id="editor-form" novalidate>
+      <div class="editor-head">
+        <h2 id="editor-heading">Edit card</h2>
+        <button type="button" class="icon-btn" data-close aria-label="Close without saving" title="Close"><span data-icon="close"></span></button>
+      </div>
+      <div class="field">
+        <label for="f-title">Title</label>
+        <input id="f-title" type="text" maxlength="200" required aria-describedby="f-title-error">
+        <p id="f-title-error" class="field-error" hidden>Give the card a title.</p>
+      </div>
+      <div class="field">
+        <label for="f-notes">Notes</label>
+        <textarea id="f-notes" rows="5" maxlength="5000" placeholder="Details, links, next steps…"></textarea>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="f-due">Due date</label>
+          <input id="f-due" type="date">
+        </div>
+        <div class="field">
+          <label for="f-col">Column</label>
+          <select id="f-col"></select>
+        </div>
+      </div>
+      <div id="editor-actions" class="editor-actions">
+        <button type="button" id="delete-btn" class="btn ghost-danger">Delete</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn" data-close>Cancel</button>
+        <button type="submit" class="btn primary">Save</button>
+      </div>
+      <div id="confirm-delete" class="confirm" hidden>
+        <p id="confirm-text">Delete this card? This can't be undone.</p>
+        <button type="button" id="keep-btn" class="btn">Keep it</button>
+        <button type="button" id="confirm-delete-btn" class="btn danger" aria-describedby="confirm-text">Delete card</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" hidden>
+    <span id="toast-msg"></span>
+    <button id="toast-undo" type="button" hidden>Undo</button>
+  </div>
+  <div id="announcer" class="sr-only" aria-live="polite"></div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "Laneboard",
+  "short_name": "Laneboard",
+  "description": "A shared-screen kanban board for small teams: To do, Doing, Done, and nothing in the way.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#111218",
+  "theme_color": "#4f46e5",
+  "icons": []
+}
