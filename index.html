@@ -13,9 +13,10 @@
       <span class="logo" data-icon="logo"></span>
       <h1>Laneboard</h1>
     </div>
+    <span id="week-chip" class="week-chip" title="Cards moved to Done since Monday"></span>
     <div class="filter" role="search">
       <span class="filter-icon" data-icon="search"></span>
-      <label for="filter" class="sr-only">Filter cards by title or notes</label>
+      <label for="filter" class="sr-only">Filter cards by title, notes, labels or checklist</label>
       <input id="filter" type="search" placeholder="Filter cards…" autocomplete="off" spellcheck="false">
       <span id="match-count" class="match-count" aria-live="polite"></span>
       <button id="filter-clear" class="icon-btn small" type="button" aria-label="Clear filter" title="Clear filter" hidden><span data-icon="close"></span></button>
@@ -24,6 +25,8 @@
       <button id="export-btn" class="icon-btn" type="button" aria-label="Export board as JSON" title="Export board as JSON"><span data-icon="download"></span></button>
       <button id="import-btn" class="icon-btn" type="button" aria-label="Import board from JSON" title="Import board from JSON"><span data-icon="upload"></span></button>
       <input id="import-file" type="file" accept="application/json,.json" aria-label="Choose a Laneboard JSON file" hidden>
+      <button id="help-btn" class="icon-btn help-btn" type="button" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)"><span data-icon="help"></span></button>
+      <button id="celebrate-btn" class="icon-btn toggle-btn" type="button" aria-label="Celebrations" aria-pressed="true"><span data-icon="party"></span></button>
       <button id="theme-btn" class="icon-btn" type="button" aria-label="Toggle dark mode"></button>
     </div>
   </header>
@@ -32,6 +35,20 @@
   <main id="board" class="board" aria-label="Board"></main>
 
   <div id="move-menu" class="menu" role="menu" hidden></div>
+
+  <div id="wip-pop" class="popover" role="dialog" aria-labelledby="wip-heading" hidden>
+    <form id="wip-form" novalidate>
+      <h3 id="wip-heading">WIP limit for Doing</h3>
+      <p class="hint">A soft warning: the count turns amber above the limit. Nothing is ever blocked.</p>
+      <label for="wip-input">Maximum cards in Doing</label>
+      <input id="wip-input" type="number" min="1" max="99" step="1" inputmode="numeric" aria-describedby="wip-error">
+      <p id="wip-error" class="field-error" hidden>Enter a whole number from 1 to 99.</p>
+      <div class="pop-actions">
+        <button type="button" id="wip-clear" class="btn">Turn off</button>
+        <button type="submit" class="btn primary">Set limit</button>
+      </div>
+    </form>
+  </div>
 
   <dialog id="editor" class="editor" aria-labelledby="editor-heading">
     <form id="editor-form" novalidate>
@@ -58,18 +75,58 @@
           <select id="f-col"></select>
         </div>
       </div>
+      <details id="f-more" class="more">
+        <summary><span>More</span><span id="more-hint" class="more-hint"></span></summary>
+        <div class="more-body">
+          <fieldset class="group">
+            <legend>Labels</legend>
+            <div id="f-labels" class="chips"></div>
+            <button type="button" id="rename-btn" class="link-btn" aria-expanded="false" aria-controls="rename-box">Name labels</button>
+            <div id="rename-box" class="rename" hidden>
+              <p class="hint">Names apply to every card and are saved right away.</p>
+            </div>
+          </fieldset>
+          <fieldset class="group">
+            <legend>Checklist <span id="f-check-count" class="muted"></span></legend>
+            <ul id="f-checklist" class="checklist"></ul>
+            <label for="f-add-item" class="sr-only">Add a checklist item, press Enter to add</label>
+            <input id="f-add-item" class="add-item" type="text" maxlength="200" placeholder="+ Add an item" autocomplete="off" enterkeyhint="enter">
+          </fieldset>
+        </div>
+      </details>
       <div id="editor-actions" class="editor-actions">
-        <button type="button" id="delete-btn" class="btn ghost-danger">Delete</button>
+        <button type="button" id="delete-btn" class="btn ghost-danger" data-undoable="true" aria-describedby="delete-hint" title="Asks for confirmation first; you can undo afterwards">Delete</button>
+        <span id="delete-hint" class="sr-only">Asks for confirmation first. A deleted card can be restored with Undo for a few seconds.</span>
         <span class="spacer"></span>
         <button type="button" class="btn" data-close>Cancel</button>
         <button type="submit" class="btn primary">Save</button>
       </div>
       <div id="confirm-delete" class="confirm" hidden>
-        <p id="confirm-text">Delete this card? This can't be undone.</p>
+        <p id="confirm-text">Delete this card? You can undo it for a few seconds afterwards.</p>
         <button type="button" id="keep-btn" class="btn">Keep it</button>
-        <button type="button" id="confirm-delete-btn" class="btn danger" aria-describedby="confirm-text">Delete card</button>
+        <button type="button" id="confirm-delete-btn" class="btn danger" data-undoable="true" aria-describedby="confirm-text">Delete card</button>
       </div>
     </form>
+  </dialog>
+
+  <dialog id="help" class="editor help" aria-labelledby="help-heading">
+    <div class="help-body">
+      <div class="editor-head">
+        <h2 id="help-heading">Keyboard shortcuts</h2>
+        <button type="button" id="help-close" class="icon-btn" aria-label="Close shortcuts" title="Close"><span data-icon="close"></span></button>
+      </div>
+      <p class="hint">Shortcuts are ignored while you type in a text box.</p>
+      <dl class="keys">
+        <div><dt><kbd>N</kbd></dt><dd>Add a card in the current column</dd></div>
+        <div><dt><kbd>/</kbd></dt><dd>Focus the filter</dd></div>
+        <div><dt><kbd>?</kbd></dt><dd>Show this help</dd></div>
+        <div><dt><kbd>Esc</kbd></dt><dd>Close the card, help, menu or popover</dd></div>
+        <div><dt><kbd>Enter</kbd></dt><dd>Open the focused card</dd></div>
+        <div><dt><kbd>Shift</kbd> + <kbd>←</kbd> <kbd>→</kbd></dt><dd>Move the focused card to the previous or next column</dd></div>
+        <div><dt><kbd>Shift</kbd> + <kbd>↑</kbd> <kbd>↓</kbd></dt><dd>Move the focused card up or down</dd></div>
+        <div><dt><kbd>Ctrl</kbd> + <kbd>Enter</kbd></dt><dd>Save while typing notes</dd></div>
+      </dl>
+    </div>
   </dialog>
 
   <div id="toast" class="toast" role="status" hidden>
